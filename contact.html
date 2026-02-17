@@ -1,16 +1,128 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Contact | LiquidRai</title>
-<meta name="description" content="Reach out to LiquidRai for information and participation.">
-<link rel="canonical" href="https://kalinwolf.github.io/contact.html">
-<meta property="og:title" content="Contact">
-<meta property="og:description" content="Reach out to LiquidRai for information and participation.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://kalinwolf.github.io/contact.html">
-<link rel="stylesheet" href="assets/css/styles.css">
-</head><body>
-<nav class="container"><div><strong>LiquidRai</strong></div><div><a href="/">Home</a><a href="project.html">Project</a><a href="realestate.html">Real Estate</a><a href="goats.html">Goat Farm</a><a href="token.html">Token</a><a href="timeline.html">Timeline</a><a href="faq.html">FAQ</a><a href="contact.html">Contact</a></div></nav>
-<section class="section container"><h1>Contact</h1><p style="color:var(--muted)">Reach out to LiquidRai for information and participation.</p></section>
-<footer><div class="container"><div>© <span id="y"></span> LiquidRai</div><div style="margin-top:10px"><a href="project.html">Project</a><a href="realestate.html">Real Estate</a><a href="goats.html">Goat Farm</a><a href="token.html">Token</a><a href="timeline.html">Timeline</a><a href="faq.html">FAQ</a><a href="contact.html">Contact</a><a href="privacy.html">Privacy</a></div></div><script>document.getElementById("y").textContent=new Date().getFullYear()</script></footer>
-<script src="assets/js/main.js"></script>
-</body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact — LiquidRai</title>
+  <meta name="description" content="Contact LiquidRai to request an investor pack, ask questions, or discuss Chiang Rai project execution and reporting." />
+  <meta name="robots" content="index,follow" />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://kalinwolf.github.io/contact.html" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/index.html">
+        <div class="brand-badge"></div>
+        <div>
+          <div class="brand-title">LiquidRai</div>
+          <div class="brand-sub">Investor pack • Questions • Due diligence</div>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="/project.html">Project</a>
+        <a href="/token.html">Token</a>
+        <a href="/timeline.html">Timeline</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div class="nav-cta">
+        <a class="btn btn-ghost" href="/faq.html">FAQ</a>
+        <a class="btn btn-primary" href="/project.html">Project</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="container">
+      <div class="kicker">Contact</div>
+      <h1 class="h1">Request the investor pack or ask a sharp question.</h1>
+      <p class="lead">No spam. No newsletters. You get a direct response.</p>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <div class="grid">
+        <div class="col-7 card" style="padding:18px">
+          <h2>Message</h2>
+          <p>This form opens your email client (no backend). Replace the placeholder email in <span class="kbd">assets/js/main.js</span> when you’re ready.</p>
+
+          <form id="contactForm" class="form">
+            <div>
+              <label for="name">Name</label>
+              <input class="input" id="name" name="name" placeholder="Your name" required />
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input class="input" id="email" name="email" type="email" placeholder="you@domain.com" required />
+            </div>
+            <div>
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Tell me what you want: investor pack, due diligence questions, partnership proposal, etc." required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Send</button>
+          </form>
+
+          <div class="notice" style="margin-top:14px">
+            Prefer sending links? Use these:
+            <div class="hero-actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-copy="https://kalinwolf.github.io/">Copy home</button>
+              <button class="btn btn-ghost" data-copy="https://kalinwolf.github.io/project.html">Copy project</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-5">
+          <div class="card" style="padding:18px">
+            <h2>What to include</h2>
+            <div class="grid">
+              <div class="col-12 feature">
+                <h3>Investor pack</h3>
+                <p>Ask for: assumptions, capex plan, risk disclosures, distribution policy draft.</p>
+              </div>
+              <div class="col-12 feature">
+                <h3>Partnership</h3>
+                <p>Tell me your resources, timeline, and what you want from the project.</p>
+              </div>
+              <div class="col-12 feature">
+                <h3>Media / podcast</h3>
+                <p>Share your audience profile and what angle you want to cover.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:18px;margin-top:16px">
+            <h2>Privacy</h2>
+            <p>Read <a href="/privacy.html">Privacy</a> for how we handle messages and basic site analytics (none by default).</p>
+            <a class="btn btn-ghost" href="/privacy.html">Privacy</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <span id="toastMsg"></span>
+    <button id="toastBtn" class="btn btn-ghost" style="padding:8px 10px">Close</button>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="small"><strong>LiquidRai</strong><br/>Direct, execution-focused communication only.</div>
+      <div class="small">
+        <div><a href="/index.html">Home</a></div>
+        <div><a href="/project.html">Project</a></div>
+        <div><a href="/token.html">Token</a></div>
+      </div>
+      <div class="small">
+        <div><a href="/faq.html">FAQ</a></div>
+        <div><a href="/privacy.html">Privacy</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

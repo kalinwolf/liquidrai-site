@@ -1,0 +1,11 @@
+{
+  "name": "LiquidRai — Chiang Rai Real Asset Project",
+  "short_name": "LiquidRai",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06070b",
+  "theme_color": "#7c5cff",
+  "icons": [
+    { "src": "/assets/img/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
