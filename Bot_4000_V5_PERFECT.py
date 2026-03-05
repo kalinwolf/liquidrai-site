@@ -10,8 +10,18 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-import requests
-import numpy as np
+try:
+    import requests
+except Exception:
+    requests = None
+
+try:
+    import numpy as np
+except Exception:
+    import subprocess
+    import sys
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
+    import numpy as np
 
 try:
     import MetaTrader5 as mt5
@@ -491,12 +501,31 @@ def _update_decision_v5(
     )
 
 
+def _http_post_json(url: str, payload: Dict[str, Any], timeout: int = 3) -> Optional[Dict[str, Any]]:
+    if requests is not None:
+        try:
+            r = requests.post(url, json=payload, timeout=timeout)
+            if not r.ok:
+                return None
+            return r.json()
+        except Exception:
+            return None
+    try:
+        import urllib.request
+        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            data = resp.read().decode("utf-8")
+        return json.loads(data)
+    except Exception:
+        return None
+
+
 def _llm_decide(headline: str) -> Tuple[str, float, str]:
     try:
         prompt = f"Classify EURUSD action BUY/SELL/HOLD for headline: {headline}. Return JSON keys action, confidence, reason."
         payload = {"model": "llama3", "prompt": prompt, "stream": False}
-        r = requests.post(LLM_ENDPOINT, json=payload, timeout=3)
-        txt = r.json().get("response", "") if r.ok else ""
+        data = _http_post_json(LLM_ENDPOINT, payload, timeout=3)
+        txt = (data or {}).get("response", "")
         action = "HOLD"
         if "BUY" in txt.upper():
             action = "BUY"
@@ -602,8 +631,8 @@ def startup_diagnostics() -> None:
         logger.warning("MT5 module unavailable")
 
     try:
-        r = requests.post(LLM_ENDPOINT, json={"model": "llama3", "prompt": "ping", "stream": False}, timeout=2)
-        logger.info("LLM reachable: %s", r.ok)
+        pong = _http_post_json(LLM_ENDPOINT, {"model": "llama3", "prompt": "ping", "stream": False}, timeout=2)
+        logger.info("LLM reachable: %s", pong is not None)
     except Exception:
         logger.warning("LLM endpoint unreachable")
 
