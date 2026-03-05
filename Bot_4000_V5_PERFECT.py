@@ -5,6 +5,7 @@ import math
 import hashlib
 import sqlite3
 import logging
+import ast
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
@@ -30,6 +31,8 @@ LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "http://127.0.0.1:11434/api/generate")
 TRADE_LOT_SIZE = float(os.getenv("TRADE_LOT_SIZE", "0.01"))
 LOOP_SLEEP_SECONDS = int(os.getenv("LOOP_SLEEP_SECONDS", "30"))
 COOLDOWN_SECONDS = int(os.getenv("COOLDOWN_SECONDS", "120"))
+ORIGINAL_V4_PATH = os.getenv("ORIGINAL_V4_PATH", os.path.join(os.getcwd(), "BOT_4000_V4.py"))
+NEW_V5_PATH = os.getenv("NEW_V5_PATH", os.path.join(os.getcwd(), "NEW_V5_SCRIPT.py"))
 
 logger = logging.getLogger("bot4000")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
@@ -123,6 +126,19 @@ def init_db() -> None:
         )
         """
     )
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS merge_audit(
+            ts TEXT,
+            source_a TEXT,
+            source_b TEXT,
+            funcs_a_json TEXT,
+            funcs_b_json TEXT,
+            duplicates_json TEXT,
+            notes TEXT
+        )
+        """
+    )
 
     cur.execute("CREATE INDEX IF NOT EXISTS idx_decisions_ts ON decisions_log(ts_run)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_decisions_hash ON decisions_log(headline_hash)")
@@ -151,6 +167,37 @@ def _ensure_decisions_log_columns(cur: sqlite3.Cursor) -> None:
     for col, ctype in wanted.items():
         if col not in existing:
             cur.execute(f"ALTER TABLE decisions_log ADD COLUMN {col} {ctype}")
+
+
+def _enumerate_functions_from_file(path: str) -> List[str]:
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            tree = ast.parse(f.read(), filename=path)
+        return [n.name for n in tree.body if isinstance(n, ast.FunctionDef)]
+    except Exception:
+        return []
+
+
+def _run_structural_diff_and_audit(conn: sqlite3.Connection, script_a: str, script_b: str) -> Dict[str, Any]:
+    funcs_a = _enumerate_functions_from_file(script_a)
+    funcs_b = _enumerate_functions_from_file(script_b)
+    dupes = sorted(set(funcs_a).intersection(funcs_b))
+    notes = "ok" if funcs_a and funcs_b else "missing_or_unreadable_source"
+    conn.execute(
+        """
+        INSERT INTO merge_audit (ts, source_a, source_b, funcs_a_json, funcs_b_json, duplicates_json, notes)
+        VALUES (?,?,?,?,?,?,?)
+        """,
+        (_now_iso(), script_a, script_b, json.dumps(funcs_a), json.dumps(funcs_b), json.dumps(dupes), notes),
+    )
+    return {
+        "funcs_a": funcs_a,
+        "funcs_b": funcs_b,
+        "duplicates": dupes,
+        "notes": notes,
+    }
 
 
 def make_features() -> np.ndarray:
@@ -539,6 +586,8 @@ def startup_diagnostics() -> None:
     logger.info("DB exists: %s", os.path.exists(DB_PATH))
     logger.info("DQN weights exists: %s", os.path.exists(DQN_WEIGHTS_PATH))
     logger.info("Scaler exists: %s", os.path.exists(SCALER_PATH))
+    logger.info("Original V4 path exists: %s (%s)", os.path.exists(ORIGINAL_V4_PATH), ORIGINAL_V4_PATH)
+    logger.info("New V5 path exists: %s (%s)", os.path.exists(NEW_V5_PATH), NEW_V5_PATH)
 
     mt5_ok = False
     if mt5 is not None:
@@ -561,6 +610,7 @@ def startup_diagnostics() -> None:
 
 def run_cycle() -> None:
     conn = get_db()
+    _run_structural_diff_and_audit(conn, ORIGINAL_V4_PATH, NEW_V5_PATH)
     ts_run = _now_iso()
     now_dt = datetime.now(timezone.utc)
 
